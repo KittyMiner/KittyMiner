@@ -1,0 +1,8 @@
+unit_id: WF-PV_001
+modification: DfM_Pass_01
+date: 2025-10-16
+P50_before: 14589692
+P50_after: 11452984
+P90_before: 21155053
+P90_after: 16606827
+actions: topology_optimization; modular_prefab; tooling_standardization
