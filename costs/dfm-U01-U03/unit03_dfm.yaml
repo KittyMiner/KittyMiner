@@ -1,8 +1,0 @@
-unit_id: DRIVE_RING
-modification: DfM_Pass_01
-date: 2025-10-16
-P50_before: 3181389
-P50_after: 2335209
-P90_before: 4614014
-P90_after: 3386052
-actions: material_substitution; process_consolidation; tooling_shared

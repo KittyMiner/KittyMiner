@@ -1,0 +1,34 @@
+name: Feature Request
+description: Suggest an idea for this project
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ✨ Feature Proposal
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What do you want to see built?
+      placeholder: Describe your idea clearly
+    validations:
+      required: true
+  - type: dropdown
+    id: domain
+    attributes:
+      label: Relevant domain
+      options:
+        - Security
+        - Wet-Lab
+        - Quantum
+        - Ethics
+        - Cross-domain
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Potential impact
+      placeholder: What might this change, unlock, or improve?
+    validations:
+      required: false
