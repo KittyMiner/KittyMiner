@@ -1,0 +1,8 @@
+agent_id: Q-ARCH-03
+domain: Quantum
+scope:
+  - optimization_loops
+  - cross_domain_sync
+  - knowledge_graph_updates
+security_level: tier-2
+report_cycle: 30d
