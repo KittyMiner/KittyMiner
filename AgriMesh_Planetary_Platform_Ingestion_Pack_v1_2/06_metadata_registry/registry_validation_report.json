@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "root": "/mnt/data/AgriMesh_Planetary_Platform_Ingestion_Pack_v1_2/AgriMesh_Planetary_Platform_Ingestion_Pack_v1_2_clean",
+  "registry_path": "/mnt/data/AgriMesh_Planetary_Platform_Ingestion_Pack_v1_2/AgriMesh_Planetary_Platform_Ingestion_Pack_v1_2_clean/06_metadata_registry/registry.json",
+  "document_count": 17,
+  "error_count": 0,
+  "warning_count": 0,
+  "findings": []
+}
