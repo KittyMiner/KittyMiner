@@ -1,0 +1,77 @@
+template_id: GAIA-VAULT-CLAIM-REVIEW-TEMPLATE-001
+version: '1.0'
+status: active_retroactive_global_gate
+scope:
+  - all_previous_gaia_vault_versions
+  - all_previous_gaia_codex_entries
+  - all_future_gaia_vault_entries
+  - visual_symbolic_assets
+  - visual_mathematical_assets
+  - schematics
+  - simulation_seeds
+  - energy_nodes
+  - propulsion_field_concepts
+  - breakthrough_intake_records
+  - education_and_xr_assets
+required_fields:
+  - node_id
+  - title
+  - version
+  - source_assets
+  - claim_type
+  - evidence_layer
+  - evidence_level
+  - validation_status
+  - blocked_claims
+  - permitted_uses
+  - review_required
+  - public_release_status
+  - promotion_requirements
+  - audit_trail
+  - next_actions
+restricted_claim_classes:
+  physical_law_claims: blocked_pending_validation
+  energy_claims: blocked_pending_validation
+  resonance_causality_claims: blocked_pending_validation
+  propulsion_field_claims: blocked_pending_validation
+  hidden_constant_encoding_claims: blocked_pending_validation
+  medical_safety_compliance_certification_claims: blocked_pending_qualified_review
+  investment_or_performance_claims: blocked_pending_evidence_and_legal_review
+evidence_layer_enum:
+  - physical_validated
+  - physical_hypothesis
+  - symbolic_analogy
+  - speculative_exploration
+  - educational_model
+  - prohibited_overclaim
+evidence_level_enum:
+  - E0_SYMBOLIC
+  - E1_HYPOTHESIS
+  - E2_PRELIMINARY
+  - E3_REPLICATED
+  - E4_VALIDATED
+  - E5_CERTIFIED
+claim_gate_outcomes:
+  - permit
+  - permit_with_disclaimer
+  - internal_only
+  - requires_review
+  - block
+promotion_requirements_default:
+  - source_provenance_author_license_or_internal_origin
+  - accepted_science_baseline_or_prior_art_review
+  - explicit_equations_mechanism_or_mapping_rule
+  - dimensional_and_unit_consistency_check
+  - reproducible_computation_or_simulation_when_applicable
+  - calibrated_measurements_with_raw_data_when_physical_claim
+  - controls_and_null_model_or_alternative_explanation_review
+  - uncertainty_analysis_and_error_bounds
+  - safety_risk_review_and_stop_conditions
+  - independent_or_qualified_expert_review_before_public_claim
+default_public_release_status: internal_only_until_rights_evidence_review_accessibility_and_redteam_pass
+default_permitted_uses:
+  - symbolic_mapping
+  - education
+  - hypothesis_generation
+  - internal_reference
+  - simulation_seed_when_assumptions_are_explicit
