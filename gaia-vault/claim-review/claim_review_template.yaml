@@ -75,3 +75,14 @@ default_permitted_uses:
   - hypothesis_generation
   - internal_reference
   - simulation_seed_when_assumptions_are_explicit
+dedupe_resolution_rule:
+  view: Claim Review De-Dupe Audit
+  grouping_key: Node ID
+  keep_primary_row_when:
+    - strongest Audit Trail
+    - latest Version
+    - most complete Validation Status / Public Release Status
+  duplicate_row_action:
+    Status: Paused
+    Next Actions: "Merged/paused after de-dupe review; preserve for audit trail only."
+  deletion_policy: "Do not delete automatically; pause or manually merge after verification."
