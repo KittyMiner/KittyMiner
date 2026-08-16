@@ -1,0 +1,50 @@
+agents:
+- name: QuantumOrchestrator
+  domain: Quantum
+  authority_scope: scoped
+  purpose: "Evaluate quantum / hybrid solutions, simulation pathways, allocation strategies, and quantum-ready infrastructure."
+  allowed_actions: [analyze, propose, draft_artifacts, request_review]
+  restricted_actions: [production_deploy_without_gate, policy_override, cross-domain_reassignment_without_approval]
+  output_route: [github_issue_or_pr, notion_card, governance_audit_log]
+- name: SecurityScanner
+  domain: Security
+  authority_scope: scoped
+  purpose: "Assess threat models, post-quantum cryptography, secrets handling, policy-as-code, and runtime hardening."
+  allowed_actions: [analyze, propose, draft_artifacts, request_review]
+  restricted_actions: [production_deploy_without_gate, policy_override, cross-domain_reassignment_without_approval]
+  output_route: [github_issue_or_pr, notion_card, governance_audit_log]
+- name: TerraformAgent
+  domain: Terraform
+  authority_scope: scoped
+  purpose: "Define IaC modules, environment promotion, state strategy, and drift detection/remediation."
+  allowed_actions: [analyze, propose, draft_artifacts, request_review]
+  restricted_actions: [production_deploy_without_gate, policy_override, cross-domain_reassignment_without_approval]
+  output_route: [github_issue_or_pr, notion_card, governance_audit_log]
+- name: GovernanceGate
+  domain: Governance
+  authority_scope: scoped
+  purpose: "Track proposal routing, merge/fork decisions, approval paths, audit evidence, and policy compliance."
+  allowed_actions: [analyze, propose, draft_artifacts, request_review]
+  restricted_actions: [production_deploy_without_gate, policy_override, cross-domain_reassignment_without_approval]
+  output_route: [github_issue_or_pr, notion_card, governance_audit_log]
+- name: EthicsReviewer
+  domain: Ethics
+  authority_scope: scoped
+  purpose: "Review safety, dual-use risk, fairness, oversight requirements, and escalation triggers."
+  allowed_actions: [analyze, propose, draft_artifacts, request_review]
+  restricted_actions: [production_deploy_without_gate, policy_override, cross-domain_reassignment_without_approval]
+  output_route: [github_issue_or_pr, notion_card, governance_audit_log]
+- name: InfraConductor
+  domain: Infrastructure
+  authority_scope: scoped
+  purpose: "Coordinate Kubernetes, Helm, observability, autoscaling, and deployment workflows."
+  allowed_actions: [analyze, propose, draft_artifacts, request_review]
+  restricted_actions: [production_deploy_without_gate, policy_override, cross-domain_reassignment_without_approval]
+  output_route: [github_issue_or_pr, notion_card, governance_audit_log]
+- name: MonitorSage
+  domain: Monitoring
+  authority_scope: scoped
+  purpose: "Refine dashboards, alerts, silences, SLOs, and anomaly detection with feedback loops."
+  allowed_actions: [analyze, propose, draft_artifacts, request_review]
+  restricted_actions: [production_deploy_without_gate, policy_override, cross-domain_reassignment_without_approval]
+  output_route: [github_issue_or_pr, notion_card, governance_audit_log]

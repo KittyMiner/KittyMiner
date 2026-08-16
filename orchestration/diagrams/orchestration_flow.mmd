@@ -1,0 +1,14 @@
+flowchart LR
+  A["Horizon Prompt Card"] --> B["Scoped Agent"]
+  B --> C["Draft Output"]
+  C --> D{"Governance Gate"}
+  D -->|"approve"| E["GitHub PR / Issue Update"]
+  D -->|"needs ethics"| F["Ethics Review"]
+  F --> D
+  D -->|"fork"| G["New Horizon"]
+  D -->|"merge"| H["Merged Workstream"]
+  E --> I["Monitoring + Audit Log"]
+  H --> I
+  G --> I
+  I --> J["30d / 50d / 90d Retros"]
+  J --> A

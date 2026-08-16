@@ -1,0 +1,18 @@
+gates:
+  technical_review:
+    required: true
+    owner: InfraConductor
+    checks: [feasibility, dependency_mapping, rollback_plan]
+  ethics_review:
+    required_when: [security_impact, biosystems_impact, human_subjects, dual_use_risk]
+    owner: EthicsReviewer
+    checks: [harm_assessment, oversight_path, escalation_trigger]
+  deploy_readiness:
+    required: true
+    owner: GovernanceGate
+    checks: [ci_green, audit_log_present, observability_defined, owner_assigned]
+audit_log:
+  destination: [github, notion]
+  fields: [timestamp, domain, agent, action, decision, merge_or_fork, reviewer]
+decisions:
+  allowed: [prune, merge, fork, defer]
