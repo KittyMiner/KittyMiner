@@ -1,0 +1,8 @@
+Name,Status,Domain,Agent Assigned,Objective,Governance Gate,30d Retro,50d Retro,90d Retro
+Horizon 1 - Quantum,Exploring,Quantum,QuantumOrchestrator,"Evaluate quantum / hybrid solutions, simulation pathways, allocation strategies, and quantum-ready infrastructure.",technical_review,2026-09-15,2026-10-05,2026-11-14
+Horizon 2 - Security,Exploring,Security,SecurityScanner,"Assess threat models, post-quantum cryptography, secrets handling, policy-as-code, and runtime hardening.",technical_review,2026-09-15,2026-10-05,2026-11-14
+Horizon 3 - Terraform,Exploring,Terraform,TerraformAgent,"Define IaC modules, environment promotion, state strategy, and drift detection/remediation.",technical_review,2026-09-15,2026-10-05,2026-11-14
+Horizon 4 - Governance,Exploring,Governance,GovernanceGate,"Track proposal routing, merge/fork decisions, approval paths, audit evidence, and policy compliance.",technical_review,2026-09-15,2026-10-05,2026-11-14
+Horizon 5 - Ethics,Exploring,Ethics,EthicsReviewer,"Review safety, dual-use risk, fairness, oversight requirements, and escalation triggers.",technical_review,2026-09-15,2026-10-05,2026-11-14
+Horizon 6 - Infrastructure,Exploring,Infrastructure,InfraConductor,"Coordinate Kubernetes, Helm, observability, autoscaling, and deployment workflows.",technical_review,2026-09-15,2026-10-05,2026-11-14
+Horizon 7 - Monitoring,Exploring,Monitoring,MonitorSage,"Refine dashboards, alerts, silences, SLOs, and anomaly detection with feedback loops.",technical_review,2026-09-15,2026-10-05,2026-11-14
