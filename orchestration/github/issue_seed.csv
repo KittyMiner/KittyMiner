@@ -1,0 +1,8 @@
+Title,Domain,Agent,Status,Governance Gate,30d Retro,50d Retro,90d Retro
+[Quantum] Horizon 1: Initial Workstream Prompt,Quantum,QuantumOrchestrator,Exploring,technical_review,2026-09-15,2026-10-05,2026-11-14
+[Security] Horizon 2: Initial Workstream Prompt,Security,SecurityScanner,Exploring,technical_review,2026-09-15,2026-10-05,2026-11-14
+[Terraform] Horizon 3: Initial Workstream Prompt,Terraform,TerraformAgent,Exploring,technical_review,2026-09-15,2026-10-05,2026-11-14
+[Governance] Horizon 4: Initial Workstream Prompt,Governance,GovernanceGate,Exploring,technical_review,2026-09-15,2026-10-05,2026-11-14
+[Ethics] Horizon 5: Initial Workstream Prompt,Ethics,EthicsReviewer,Exploring,technical_review,2026-09-15,2026-10-05,2026-11-14
+[Infrastructure] Horizon 6: Initial Workstream Prompt,Infrastructure,InfraConductor,Exploring,technical_review,2026-09-15,2026-10-05,2026-11-14
+[Monitoring] Horizon 7: Initial Workstream Prompt,Monitoring,MonitorSage,Exploring,technical_review,2026-09-15,2026-10-05,2026-11-14
