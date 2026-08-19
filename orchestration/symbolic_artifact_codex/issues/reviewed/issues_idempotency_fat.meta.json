@@ -1,0 +1,24 @@
+{
+  "artifact_name": "issues_idempotency_fat",
+  "schema_version": "1.0.0",
+  "record_count": 3,
+  "sha256": "180897cf23cdee4b804642e46b65f784eeb99615116340d3ab8daa8b430ad024",
+  "canonical_issue_ids": [
+    "GAIA-SAC-FAT-001",
+    "GAIA-SAC-FAT-002",
+    "GAIA-SAC-FAT-003"
+  ],
+  "governance": {
+    "reviewed": true,
+    "purpose": "idempotent GitHub issue creation FAT",
+    "expected_run_1": {"created": 3, "skipped": 0},
+    "expected_run_2": {"created": 0, "skipped": 3},
+    "fail_closed_on": [
+      "duplicate canonical ID in payload",
+      "duplicate canonical ID in repository",
+      "same title without canonical marker",
+      "artifact SHA-256 mismatch",
+      "malformed JSONL"
+    ]
+  }
+}
