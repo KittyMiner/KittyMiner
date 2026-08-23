@@ -1,0 +1,38 @@
+{
+  "run_id": "PGS-001-VL13-2026-08-10-01",
+  "timestamp": "2026-08-10T11:07:00-04:00",
+  "scenario_id": "PGS-001",
+  "scenario_version": "0.2",
+  "mode": "SYNTHETIC_ONLY",
+  "metrics": {
+    "nominal_cases": 500,
+    "adversarial_cases": 4,
+    "adversarial_controls_passed": 4,
+    "network_calls": 0,
+    "real_user_data": 0,
+    "live_actuation_events": 0,
+    "forecast_claims": 0,
+    "safety_compliance_tested": 1.0,
+    "authority_integrity_tested": 1.0,
+    "real_world_predictive_validity": "NOT_EVALUATED_SYNTHETIC_ONLY",
+    "fairness_assessment": "NOT_EVALUATED_NO_PROTECTED_CLASS_OR_REAL_POPULATION_DATA"
+  },
+  "gates": {
+    "VL-01": "PASS",
+    "VL-02": "HOLD",
+    "VL-03": "PASS",
+    "VL-04": "PASS",
+    "VL-05": "HOLD",
+    "VL-06": "PASS",
+    "VL-07": "PASS",
+    "VL-08": "HOLD",
+    "VL-09": "PASS",
+    "VL-10": "PASS",
+    "VL-11": "HOLD",
+    "VL-12": "PASS",
+    "VL-13": "PASS"
+  },
+  "overall_state": "HOLD",
+  "promotion": "BLOCKED_BEYOND_CONTROLLED_RESEARCH",
+  "sha256_precommit_payload": "f55519742d370655c640ed6954ed07d790e8ec647e9fbcea5b361ab21403488c"
+}

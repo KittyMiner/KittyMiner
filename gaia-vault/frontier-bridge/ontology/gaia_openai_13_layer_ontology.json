@@ -1,0 +1,22 @@
+{
+  "ontology_id": "GAIA-OAI-PUBLIC-BRIDGE-ONTOLOGY",
+  "version": "0.2",
+  "status": "PROPOSED_CONTROLLED_NORMALIZATION",
+  "canonical_rule": "GAIA-native terms remain primary; OpenAI concepts are public-reference mappings only.",
+  "layers": [
+    {"id":"VL-01","name":"Identity and Scope"},
+    {"id":"VL-02","name":"Source Provenance and Data Rights"},
+    {"id":"VL-03","name":"Evidence Classification and Confidence"},
+    {"id":"VL-04","name":"Assumptions, Limitations, and Intended Use"},
+    {"id":"VL-05","name":"Capability and Performance Evaluation"},
+    {"id":"VL-06","name":"Robustness, Adversarial, and Prompt-Injection Testing"},
+    {"id":"VL-07","name":"Security, Privacy, and Data Governance"},
+    {"id":"VL-08","name":"Bias, Fairness, and Ethical Impact"},
+    {"id":"VL-09","name":"Human Authority, Chain of Command, and Appeals"},
+    {"id":"VL-10","name":"Safeguards, Risk Mitigation, and Defense in Depth"},
+    {"id":"VL-11","name":"Operational Readiness, Monitoring, and Incident Response"},
+    {"id":"VL-12","name":"Claim Promotion, Anti-Pattern Quarantine, and Deployment Authorization"},
+    {"id":"VL-13","name":"Audit, Transparency, Lifecycle, and Continuous Improvement"}
+  ],
+  "promotion_rule": "No promotion beyond tested evidence and authorized scope."
+}

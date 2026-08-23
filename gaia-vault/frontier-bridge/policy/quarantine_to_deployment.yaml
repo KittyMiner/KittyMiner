@@ -1,0 +1,13 @@
+policy_id: GAIA-FRONTIER-GATE-v0.2
+default_state: PENDING
+states: [PENDING, PASS, FAIL, HOLD, QUARANTINE, REMEDIATE]
+gates: [VL-01, VL-02, VL-03, VL-04, VL-05, VL-06, VL-07, VL-08, VL-09, VL-10, VL-11, VL-12, VL-13]
+rules:
+  - missing_evidence_never_passes
+  - mandatory_fail_blocks_promotion
+  - quarantine_preserves_signal_without_promoting_claim
+  - promotion_is_exact_version_and_scope
+deployment:
+  required: [VL-01, VL-02, VL-03, VL-04, VL-05, VL-06, VL-07, VL-08, VL-09, VL-10, VL-11, VL-12]
+  decision: "DEPLOY only when all required gates PASS and named human authority approves."
+retest_triggers: [model_change, prompt_change, policy_change, tool_change, data_change, infrastructure_change, incident, scope_change]
