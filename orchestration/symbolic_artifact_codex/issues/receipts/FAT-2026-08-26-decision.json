@@ -1,0 +1,82 @@
+{
+  "receipt_id": "GAIA-SAC-IDEMPOTENCY-FAT-DECISION-2026-08-26",
+  "repository": "KittyMiner/KittyMiner",
+  "branch": "gaia/symbolic-codex-idempotency-fat-v0.2",
+  "reviewed_artifact": "orchestration/symbolic_artifact_codex/issues/reviewed/issues_idempotency_fat.jsonl",
+  "reviewed_artifact_sha256": "180897cf23cdee4b804642e46b65f784eeb99615116340d3ab8daa8b430ad024",
+  "reviewed_artifact_blob_sha": "1aa1223ac0990cdd3829ca2a8453e80a1ac3191f",
+  "canonical_issue_ids": [
+    "GAIA-SAC-FAT-001",
+    "GAIA-SAC-FAT-002",
+    "GAIA-SAC-FAT-003"
+  ],
+  "precheck": {
+    "GAIA-SAC-FAT-001": "ABSENT",
+    "GAIA-SAC-FAT-002": "ABSENT",
+    "GAIA-SAC-FAT-003": "ABSENT"
+  },
+  "sequence": [
+    {
+      "sequence": 1,
+      "action": "ENABLE_GITHUB_ISSUES",
+      "status": "BLOCKED_EXTERNAL_PREREQUISITE",
+      "evidence": "Connected GitHub tool surface exposes no repository setting mutation for has_issues; live create probe returned HTTP 410: Issues has been disabled in this repository."
+    },
+    {
+      "sequence": 2,
+      "action": "VERIFY_SEALED_HASH",
+      "status": "PASS",
+      "observed_sha256": "180897cf23cdee4b804642e46b65f784eeb99615116340d3ab8daa8b430ad024",
+      "bytes_length": 2103,
+      "blob_sha": "1aa1223ac0990cdd3829ca2a8453e80a1ac3191f"
+    },
+    {
+      "sequence": 3,
+      "action": "EXECUTE_FAT_RUN_1",
+      "status": "HOLD",
+      "expected": {
+        "created": 3,
+        "skipped": 0
+      },
+      "observed": {
+        "created": 0,
+        "skipped": 0,
+        "partial_creation": false,
+        "http_status": 410
+      }
+    },
+    {
+      "sequence": 4,
+      "action": "EXECUTE_IDENTICAL_FAT_RUN_2",
+      "status": "NOT_AUTHORIZED",
+      "reason": "Run 1 did not complete successfully."
+    },
+    {
+      "sequence": 5,
+      "action": "VERIFY_MAPPING",
+      "status": "NOT_RUN",
+      "reason": "No GitHub issue identities were created."
+    },
+    {
+      "sequence": 6,
+      "action": "ISSUE_DECISION_RECEIPT",
+      "status": "HOLD"
+    },
+    {
+      "sequence": 7,
+      "action": "UNLOCK_M04",
+      "status": "LOCKED",
+      "unlock_only_if": "PASS",
+      "next_build": "GAIA_SYMBOLIC_ARTIFACT_CODEX_M04_cross_ecosystem_evidence_graph_and_continuous_assurance_v0.1"
+    }
+  ],
+  "disposition": "HOLD",
+  "invariants_preserved": [
+    "sealed artifact bytes unchanged",
+    "canonical issue IDs unchanged",
+    "no new baseline created",
+    "no partial GitHub issue creation",
+    "M04 remains locked"
+  ],
+  "next_gate": "Enable GitHub Issues for KittyMiner/KittyMiner, then replay the exact sealed artifact twice."
+}
