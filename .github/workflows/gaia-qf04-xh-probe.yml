@@ -1,0 +1,161 @@
+name: GAIA QF04 Cross-Host TCP Probe
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/gaia-qf04-xh-probe.yml"
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  listener_vm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Launch isolated TCP listener
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p runtime
+          cat > runtime/listener.py <<'PY'
+          import socket
+          HOST = "0.0.0.0"
+          PORT = 31247
+          with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+              s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+              s.bind((HOST, PORT))
+              s.listen(8)
+              print("LISTENING", flush=True)
+              while True:
+                  conn, addr = s.accept()
+                  with conn:
+                      data = conn.recv(4096)
+                      if data == b"QF04-XH-PROBE":
+                          conn.sendall(b"QF04-XH-ACK")
+                          print(f"PEER_OK {addr[0]}:{addr[1]}", flush=True)
+                          break
+                      conn.sendall(b"DENY")
+          PY
+          RUNNER_TRACKING_ID="" nohup python runtime/listener.py >runtime/listener.log 2>&1 &
+          echo $! > runtime/listener.pid
+          for i in $(seq 1 20); do
+            grep -q LISTENING runtime/listener.log && break
+            sleep 1
+          done
+          grep -q LISTENING runtime/listener.log
+          PUB_IP="$(curl -fsS --max-time 10 https://api.ipify.org)"
+          python - "$PUB_IP" <<'PY'
+          import json, os, socket, sys
+          info = {
+              "public_ip": sys.argv[1],
+              "port": 31247,
+              "hostname": socket.gethostname(),
+              "runner_name": os.environ.get("RUNNER_NAME"),
+              "runner_os": os.environ.get("RUNNER_OS"),
+              "run_id": os.environ.get("GITHUB_RUN_ID"),
+              "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
+          }
+          open("runtime/listener_info.json","w").write(json.dumps(info, sort_keys=True))
+          print(json.dumps(info, sort_keys=True))
+          PY
+
+      - name: Publish listener endpoint
+        uses: actions/upload-artifact@v4
+        with:
+          name: qf04-xh-listener-info
+          path: runtime/listener_info.json
+          retention-days: 1
+
+      - name: Await direct peer connection
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 150); do
+            if grep -q PEER_OK runtime/listener.log; then
+              cat runtime/listener.log
+              exit 0
+            fi
+            sleep 1
+          done
+          cat runtime/listener.log
+          exit 42
+
+  client_vm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Wait for listener endpoint artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p runtime/info
+          ART_ID=""
+          for i in $(seq 1 120); do
+            ART_ID="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts" --jq '.artifacts[] | select(.name=="qf04-xh-listener-info") | .id' | head -1 || true)"
+            if [ -n "$ART_ID" ]; then break; fi
+            sleep 2
+          done
+          test -n "$ART_ID"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${ART_ID}/zip" > runtime/info.zip
+          unzip -q runtime/info.zip -d runtime/info
+          cat runtime/info/listener_info.json
+
+      - name: Attempt direct routed TCP connection
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, socket, time
+          info = json.load(open("runtime/info/listener_info.json"))
+          local = {
+              "hostname": socket.gethostname(),
+              "runner_name": os.environ.get("RUNNER_NAME"),
+              "run_id": os.environ.get("GITHUB_RUN_ID"),
+          }
+          assert local["hostname"] != info["hostname"], (local, info)
+          last = None
+          for attempt in range(30):
+              try:
+                  with socket.create_connection((info["public_ip"], int(info["port"])), timeout=4) as s:
+                      s.sendall(b"QF04-XH-PROBE")
+                      reply = s.recv(4096)
+                      if reply != b"QF04-XH-ACK":
+                          raise RuntimeError(f"unexpected reply {reply!r}")
+                      result = {
+                          "status": "PASS",
+                          "attempt": attempt + 1,
+                          "listener": info,
+                          "client": local,
+                      }
+                      open("runtime/client_result.json","w").write(json.dumps(result, sort_keys=True))
+                      print(json.dumps(result, sort_keys=True))
+                      raise SystemExit(0)
+              except Exception as exc:
+                  last = repr(exc)
+                  time.sleep(2)
+          result = {
+              "status": "HOLD_DIRECT_TCP_UNREACHABLE",
+              "listener": info,
+              "client": local,
+              "last_error": last,
+          }
+          open("runtime/client_result.json","w").write(json.dumps(result, sort_keys=True))
+          print(json.dumps(result, sort_keys=True))
+          raise SystemExit(43)
+          PY
+
+      - name: Publish client result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qf04-xh-client-result
+          path: runtime/client_result.json
+          if-no-files-found: ignore
+          retention-days: 1
