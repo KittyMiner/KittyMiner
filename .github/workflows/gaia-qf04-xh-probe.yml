@@ -6,6 +6,10 @@ on:
     paths:
       - ".github/workflows/gaia-qf04-xh-probe.yml"
 
+concurrency:
+  group: gaia-qf04-xh-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
   actions: read
   contents: read
@@ -49,10 +53,16 @@ jobs:
           done
           grep -q LISTENING runtime/listener.log
           PUB_IP="$(curl -fsS --max-time 10 https://api.ipify.org)"
-          python - "$PUB_IP" <<'PY'
+          PRIVATE_IPS="$(hostname -I | xargs)"
+          MACHINE_ID="$(cat /etc/machine-id)"
+          BOOT_ID="$(cat /proc/sys/kernel/random/boot_id)"
+          python - "$PUB_IP" "$PRIVATE_IPS" "$MACHINE_ID" "$BOOT_ID" <<'PY'
           import json, os, socket, sys
           info = {
               "public_ip": sys.argv[1],
+              "private_ips": [x for x in sys.argv[2].split() if x],
+              "machine_id": sys.argv[3],
+              "boot_id": sys.argv[4],
               "port": 31247,
               "hostname": socket.gethostname(),
               "runner_name": os.environ.get("RUNNER_NAME"),
@@ -112,43 +122,63 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import json, os, socket, time
+          import json, os, socket, time, urllib.request
           info = json.load(open("runtime/info/listener_info.json"))
+          with urllib.request.urlopen("https://api.ipify.org", timeout=10) as r:
+              public_ip = r.read().decode().strip()
           local = {
               "hostname": socket.gethostname(),
               "runner_name": os.environ.get("RUNNER_NAME"),
               "run_id": os.environ.get("GITHUB_RUN_ID"),
+              "public_ip": public_ip,
+              "private_ips": socket.gethostbyname_ex(socket.gethostname())[2],
+              "machine_id": open("/etc/machine-id").read().strip(),
+              "boot_id": open("/proc/sys/kernel/random/boot_id").read().strip(),
           }
-          assert local["hostname"] != info["hostname"], (local, info)
-          last = None
-          for attempt in range(30):
-              try:
-                  with socket.create_connection((info["public_ip"], int(info["port"])), timeout=4) as s:
-                      s.sendall(b"QF04-XH-PROBE")
-                      reply = s.recv(4096)
-                      if reply != b"QF04-XH-ACK":
-                          raise RuntimeError(f"unexpected reply {reply!r}")
-                      result = {
-                          "status": "PASS",
-                          "attempt": attempt + 1,
-                          "listener": info,
-                          "client": local,
-                      }
-                      open("runtime/client_result.json","w").write(json.dumps(result, sort_keys=True))
-                      print(json.dumps(result, sort_keys=True))
-                      raise SystemExit(0)
-              except Exception as exc:
-                  last = repr(exc)
-                  time.sleep(2)
+          independent = (
+              local["machine_id"] != info["machine_id"]
+              and local["boot_id"] != info["boot_id"]
+              and local["runner_name"] != info["runner_name"]
+          )
+          targets = [("public", info["public_ip"])]
+          targets.extend(("private", ip) for ip in info.get("private_ips", []))
+          attempts = []
+          if independent:
+              for kind, host in targets:
+                  for attempt in range(8):
+                      try:
+                          with socket.create_connection((host, int(info["port"])), timeout=3) as s:
+                              s.sendall(b"QF04-XH-PROBE")
+                              reply = s.recv(4096)
+                              if reply != b"QF04-XH-ACK":
+                                  raise RuntimeError(f"unexpected reply {reply!r}")
+                              result = {
+                                  "status": "PASS_INDEPENDENT_VM_DIRECT_TCP",
+                                  "target_kind": kind,
+                                  "target": host,
+                                  "attempt": attempt + 1,
+                                  "independent_vm": True,
+                                  "listener": info,
+                                  "client": local,
+                                  "attempts": attempts,
+                              }
+                              open("runtime/client_result.json","w").write(json.dumps(result, sort_keys=True))
+                              print(json.dumps(result, sort_keys=True))
+                              raise SystemExit(0)
+                      except Exception as exc:
+                          attempts.append({"kind": kind, "host": host, "attempt": attempt + 1, "error": repr(exc)})
+                          time.sleep(1)
+          status = "HOLD_NOT_INDEPENDENT_VM" if not independent else "HOLD_DIRECT_TCP_UNREACHABLE"
           result = {
-              "status": "HOLD_DIRECT_TCP_UNREACHABLE",
+              "status": status,
+              "independent_vm": independent,
               "listener": info,
               "client": local,
-              "last_error": last,
+              "attempts": attempts,
           }
           open("runtime/client_result.json","w").write(json.dumps(result, sort_keys=True))
           print(json.dumps(result, sort_keys=True))
-          raise SystemExit(43)
+          raise SystemExit(44 if not independent else 43)
           PY
 
       - name: Publish client result
@@ -157,5 +187,5 @@ jobs:
         with:
           name: qf04-xh-client-result
           path: runtime/client_result.json
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 1
