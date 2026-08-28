@@ -52,17 +52,30 @@ jobs:
             sleep 1
           done
           grep -q LISTENING runtime/listener.log
+          cargo install bore-cli --locked
+          RUNNER_TRACKING_ID="" NO_COLOR=1 nohup "$HOME/.cargo/bin/bore" local 31247 --to bore.pub >runtime/bore.log 2>&1 &
+          echo $! > runtime/bore.pid
+          RELAY_PORT=""
+          for i in $(seq 1 90); do
+            RELAY_PORT="$(grep -Eo 'bore\.pub:[0-9]+' runtime/bore.log | tail -1 | cut -d: -f2 || true)"
+            if [ -n "$RELAY_PORT" ]; then break; fi
+            sleep 1
+          done
+          cat runtime/bore.log
+          test -n "$RELAY_PORT"
           PUB_IP="$(curl -fsS --max-time 10 https://api.ipify.org)"
           PRIVATE_IPS="$(hostname -I | xargs)"
           MACHINE_ID="$(cat /etc/machine-id)"
           BOOT_ID="$(cat /proc/sys/kernel/random/boot_id)"
-          python - "$PUB_IP" "$PRIVATE_IPS" "$MACHINE_ID" "$BOOT_ID" <<'PY'
+          python - "$PUB_IP" "$PRIVATE_IPS" "$MACHINE_ID" "$BOOT_ID" "$RELAY_PORT" <<'PY'
           import json, os, socket, sys
           info = {
               "public_ip": sys.argv[1],
               "private_ips": [x for x in sys.argv[2].split() if x],
               "machine_id": sys.argv[3],
               "boot_id": sys.argv[4],
+              "relay_host": "bore.pub",
+              "relay_port": int(sys.argv[5]),
               "port": 31247,
               "hostname": socket.gethostname(),
               "runner_name": os.environ.get("RUNNER_NAME"),
@@ -143,22 +156,24 @@ jobs:
                   or set(local["private_ips"]) != set(info.get("private_ips", []))
               )
           )
-          targets = [("public", info["public_ip"])]
-          targets.extend(("private", ip) for ip in info.get("private_ips", []))
+          targets = [("relay", info["relay_host"], int(info["relay_port"])),
+                     ("public", info["public_ip"], int(info["port"]))]
+          targets.extend(("private", ip, int(info["port"])) for ip in info.get("private_ips", []))
           attempts = []
           if independent:
-              for kind, host in targets:
+              for kind, host, port in targets:
                   for attempt in range(8):
                       try:
-                          with socket.create_connection((host, int(info["port"])), timeout=3) as s:
+                          with socket.create_connection((host, port), timeout=3) as s:
                               s.sendall(b"QF04-XH-PROBE")
                               reply = s.recv(4096)
                               if reply != b"QF04-XH-ACK":
                                   raise RuntimeError(f"unexpected reply {reply!r}")
                               result = {
-                                  "status": "PASS_INDEPENDENT_VM_DIRECT_TCP",
+                                  "status": "PASS_INDEPENDENT_VM_RELAYED_TCP" if kind == "relay" else "PASS_INDEPENDENT_VM_DIRECT_TCP",
                                   "target_kind": kind,
                                   "target": host,
+                                  "target_port": port,
                                   "attempt": attempt + 1,
                                   "independent_vm": True,
                                   "listener": info,
@@ -169,7 +184,7 @@ jobs:
                               print(json.dumps(result, sort_keys=True))
                               raise SystemExit(0)
                       except Exception as exc:
-                          attempts.append({"kind": kind, "host": host, "attempt": attempt + 1, "error": repr(exc)})
+                          attempts.append({"kind": kind, "host": host, "port": port, "attempt": attempt + 1, "error": repr(exc)})
                           time.sleep(1)
           status = "HOLD_NOT_INDEPENDENT_VM" if not independent else "HOLD_DIRECT_TCP_UNREACHABLE"
           result = {
