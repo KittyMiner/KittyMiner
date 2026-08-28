@@ -136,9 +136,12 @@ jobs:
               "boot_id": open("/proc/sys/kernel/random/boot_id").read().strip(),
           }
           independent = (
-              local["machine_id"] != info["machine_id"]
-              and local["boot_id"] != info["boot_id"]
+              local["boot_id"] != info["boot_id"]
               and local["runner_name"] != info["runner_name"]
+              and (
+                  local["public_ip"] != info["public_ip"]
+                  or set(local["private_ips"]) != set(info.get("private_ips", []))
+              )
           )
           targets = [("public", info["public_ip"])]
           targets.extend(("private", ip) for ip in info.get("private_ips", []))
