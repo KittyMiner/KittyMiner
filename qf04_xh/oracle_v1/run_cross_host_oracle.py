@@ -73,18 +73,21 @@ def run_one(chost,cport,campaign,name,root):
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument("--control-host"); ap.add_argument("--control-port",type=int); ap.add_argument("--out",required=True); a=ap.parse_args()
     out=pathlib.Path(a.out); out.mkdir(parents=True,exist_ok=True); campaigns=[]; worker_vm=None
-    for run in (1,2):
-        rows=[]
-        for name in SCENARIOS:
-            rr=out/f"run{run}"/name; rr.mkdir(parents=True,exist_ok=True)
-            x,worker_vm=run_one(a.control_host,a.control_port,f"run{run}",name,rr); rows.append(x)
-        campaigns.append(rows)
-    hashes1=[x["scenario_hash"] for x in campaigns[0]]; hashes2=[x["scenario_hash"] for x in campaigns[1]]
-    result={"qualification_id":"GAIA-ORCHESTRATOR-QF04-XH","campaigns":campaigns,"two_run_reproducible":hashes1==hashes2,"worker_vm":worker_vm,"coordinator_vm":{"runner_name":__import__("os").getenv("RUNNER_NAME"),"hostname":socket.gethostname(),"boot_id":pathlib.Path("/proc/sys/kernel/random/boot_id").read_text().strip()},"source_bundle_sha256":"6f7d62aff134dfaba54c5c4653ba97c32834295dc58f7f1f541269a02c052755","external_effects":0,"authority_expansion":0}
-    result["independent_vm"]=result["worker_vm"]["boot_id"]!=result["coordinator_vm"]["boot_id"] and result["worker_vm"]["runner_name"]!=result["coordinator_vm"]["runner_name"]
-    if not result["two_run_reproducible"] or not result["independent_vm"]: raise AssertionError("physical/reproducibility gate failed")
-    result["campaign_hash"]=canonical_hash({"campaigns":campaigns})
-    (out/"qf04_xh_campaign.json").write_text(json.dumps(result,sort_keys=True,separators=(",",":"))+"\n")
-    control(a.control_host,a.control_port,{"op":"STOP"})
-    print(json.dumps({"status":"PASS","campaign_hash":result["campaign_hash"],"independent_vm":result["independent_vm"],"scenarios":len(SCENARIOS)},sort_keys=True))
+    try:
+        for run in (1,2):
+            rows=[]
+            for name in SCENARIOS:
+                rr=out/f"run{run}"/name; rr.mkdir(parents=True,exist_ok=True)
+                x,worker_vm=run_one(a.control_host,a.control_port,f"run{run}",name,rr); rows.append(x)
+            campaigns.append(rows)
+        hashes1=[x["scenario_hash"] for x in campaigns[0]]; hashes2=[x["scenario_hash"] for x in campaigns[1]]
+        result={"qualification_id":"GAIA-ORCHESTRATOR-QF04-XH","campaigns":campaigns,"two_run_reproducible":hashes1==hashes2,"worker_vm":worker_vm,"coordinator_vm":{"runner_name":__import__("os").getenv("RUNNER_NAME"),"hostname":socket.gethostname(),"boot_id":pathlib.Path("/proc/sys/kernel/random/boot_id").read_text().strip()},"source_bundle_sha256":"6f7d62aff134dfaba54c5c4653ba97c32834295dc58f7f1f541269a02c052755","external_effects":0,"authority_expansion":0}
+        result["independent_vm"]=result["worker_vm"]["boot_id"]!=result["coordinator_vm"]["boot_id"] and result["worker_vm"]["runner_name"]!=result["coordinator_vm"]["runner_name"]
+        if not result["two_run_reproducible"] or not result["independent_vm"]: raise AssertionError("physical/reproducibility gate failed")
+        result["campaign_hash"]=canonical_hash({"campaigns":campaigns})
+        (out/"qf04_xh_campaign.json").write_text(json.dumps(result,sort_keys=True,separators=(",",":"))+"\n")
+        print(json.dumps({"status":"PASS","campaign_hash":result["campaign_hash"],"independent_vm":result["independent_vm"],"scenarios":len(SCENARIOS)},sort_keys=True))
+    finally:
+        try: control(a.control_host,a.control_port,{"op":"STOP"})
+        except Exception: pass
 if __name__=="__main__": main()
