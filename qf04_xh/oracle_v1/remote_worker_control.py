@@ -1,5 +1,5 @@
 from __future__ import annotations
-import argparse, json, os, pathlib, select, shutil, socket, subprocess, sys, time
+import argparse, json, os, pathlib, re, select, shutil, socket, subprocess, sys, time
 
 HERE = pathlib.Path(__file__).resolve().parent
 SOURCE = pathlib.Path("/tmp/qf04-source-v3")
@@ -12,6 +12,11 @@ WORKFLOWS = {
     "CONTROL": (pathlib.Path("/tmp/qf04-workflows/control"), [sys.executable, "scripts/preflight.py"], "WF-CONTROL-PREFLIGHT"),
     "STAGING": (pathlib.Path("/tmp/qf04-workflows/staging"), [sys.executable, "scripts_validate.py"], "WF-STAGING-QUAL"),
 }
+
+
+def _parse_remote_port(line: str) -> int | None:
+    match = re.search(r"(?:bore\.pub:|remote_port=)(\d+)", line)
+    return int(match.group(1)) if match else None
 
 class Control:
     def __init__(self, root: pathlib.Path, bore: str):
@@ -42,9 +47,8 @@ class Control:
                 line=p.stdout.readline()
                 if not line: break
                 lines.append(line.strip())
-                import re
-                m=re.search(r"bore\.pub:(\d+)",line)
-                if m: remote=int(m.group(1)); break
+                remote = _parse_remote_port(line)
+                if remote is not None: break
             attempts.append({"attempt":attempt,"returncode":p.poll(),"lines":lines[-8:]})
             with (self.root/"tunnel_debug.jsonl").open("a") as f:
                 f.write(json.dumps({"key":key,**attempts[-1]},sort_keys=True)+"\n")
