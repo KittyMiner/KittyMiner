@@ -1,0 +1,79 @@
+name: GAIA QF04-XH Full Oracle
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/gaia-qf04-xh-oracle.yml"
+      - "qf04_xh/oracle_v1/**"
+permissions:
+  actions: read
+  contents: read
+jobs:
+  worker_vm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash qf04_xh/source_v3/reconstruct_and_verify.sh qf04_xh/source_v3 /tmp/qf04-source-v3
+      - name: Prepare unchanged workflows
+        run: |
+          mkdir -p /tmp/qf04-workflows/mfg /tmp/qf04-workflows/control /tmp/qf04-workflows/staging
+          unzip -q /tmp/qf04-source-v3/sources/GAIA_MFG_M01-A0a_executable_v0.1.zip -d /tmp/qf04-workflows/mfg
+          unzip -q /tmp/qf04-source-v3/sources/gaia-atom-control-plane-v1.0.zip -d /tmp/qf04-workflows/control
+          unzip -q /tmp/qf04-source-v3/sources/gaia-atom-staging-qualification-v1.0.zip -d /tmp/qf04-workflows/staging
+      - name: Install raw TCP relay client
+        run: cargo install bore-cli --locked
+      - name: Start cross-host worker control
+        run: |
+          RUNNER_TRACKING_ID="" nohup python qf04_xh/oracle_v1/remote_worker_control.py --bore "$HOME/.cargo/bin/bore" > /tmp/qf04-control.log 2>&1 &
+          for i in $(seq 1 30); do grep -q '"ready"' /tmp/qf04-control.log && break; sleep 1; done
+          grep -q '"ready"' /tmp/qf04-control.log
+          RUNNER_TRACKING_ID="" NO_COLOR=1 nohup "$HOME/.cargo/bin/bore" local 31247 --to bore.pub >/tmp/qf04-control-bore.log 2>&1 &
+          for i in $(seq 1 90); do PORT="$(grep -Eo 'bore\.pub:[0-9]+' /tmp/qf04-control-bore.log | tail -1 | cut -d: -f2 || true)"; [ -n "$PORT" ] && break; sleep 1; done
+          python - "$PORT" <<'PY'
+          import json,os,pathlib,socket,sys
+          pathlib.Path("/tmp/qf04-worker-info.json").write_text(json.dumps({"host":"bore.pub","port":int(sys.argv[1]),"runner_name":os.getenv("RUNNER_NAME"),"hostname":socket.gethostname(),"boot_id":pathlib.Path("/proc/sys/kernel/random/boot_id").read_text().strip()},sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qf04-xh-worker-info
+          path: /tmp/qf04-worker-info.json
+          retention-days: 2
+      - name: Await oracle completion
+        run: |
+          for i in $(seq 1 1200); do [ -f /tmp/qf04-worker-done ] && exit 0; sleep 1; done
+          exit 45
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qf04-xh-remote-journals
+          path: /tmp/qf04-remote
+          retention-days: 2
+  coordinator_vm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash qf04_xh/source_v3/reconstruct_and_verify.sh qf04_xh/source_v3 /tmp/qf04-source-v3
+      - name: Acquire live worker endpoint
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/qf04-info
+          for i in $(seq 1 300); do ART_ID="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts" --jq '.artifacts[] | select(.name=="qf04-xh-worker-info") | .id' | head -1 || true)"; [ -n "$ART_ID" ] && break; sleep 2; done
+          test -n "$ART_ID"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${ART_ID}/zip" >/tmp/qf04-info.zip
+          unzip -q /tmp/qf04-info.zip -d /tmp/qf04-info
+      - name: Run unchanged QF04 oracle twice
+        run: |
+          HOST="$(python -c 'import json;print(json.load(open("/tmp/qf04-info/qf04-worker-info.json"))["host"])')"
+          PORT="$(python -c 'import json;print(json.load(open("/tmp/qf04-info/qf04-worker-info.json"))["port"])')"
+          python qf04_xh/oracle_v1/run_cross_host_oracle.py --control-host "$HOST" --control-port "$PORT" --out /tmp/qf04-xh-evidence
+      - name: Cold reconstruction
+        run: python qf04_xh/oracle_v1/cold_verify.py /tmp/qf04-xh-evidence/qf04_xh_campaign.json | tee /tmp/qf04-xh-evidence/cold_verification.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qf04-xh-evidence
+          path: /tmp/qf04-xh-evidence
+          retention-days: 2
