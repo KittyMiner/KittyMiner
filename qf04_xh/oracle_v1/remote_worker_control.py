@@ -29,21 +29,33 @@ class Control:
         self.tunnels={}; self.workers={}; self.ports={}
 
     def _tunnel(self, key: str, local_port: int) -> int:
-        p=subprocess.Popen([self.bore,"local",str(local_port),"--to","bore.pub"],stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,env={**os.environ,"NO_COLOR":"1","RUNNER_TRACKING_ID":""})
-        assert p.stdout
-        deadline=time.time()+90; remote=None
-        while time.time()<deadline:
-            ready,_,_=select.select([p.stdout],[],[],1)
-            if not ready: continue
-            line=p.stdout.readline()
-            if not line: break
-            import re
-            m=re.search(r"bore\.pub:(\d+)",line)
-            if m: remote=int(m.group(1)); break
-        if remote is None:
-            p.terminate(); raise RuntimeError(f"bore tunnel failed for {key}")
-        self.tunnels[key]=p
-        return remote
+        attempts=[]
+        for attempt in range(1,5):
+            p=subprocess.Popen([self.bore,"local",str(local_port),"--to","bore.pub"],stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,env={**os.environ,"NO_COLOR":"1","RUNNER_TRACKING_ID":""})
+            assert p.stdout
+            deadline=time.time()+35; remote=None; lines=[]
+            while time.time()<deadline:
+                ready,_,_=select.select([p.stdout],[],[],1)
+                if not ready:
+                    if p.poll() is not None: break
+                    continue
+                line=p.stdout.readline()
+                if not line: break
+                lines.append(line.strip())
+                import re
+                m=re.search(r"bore\.pub:(\d+)",line)
+                if m: remote=int(m.group(1)); break
+            attempts.append({"attempt":attempt,"returncode":p.poll(),"lines":lines[-8:]})
+            with (self.root/"tunnel_debug.jsonl").open("a") as f:
+                f.write(json.dumps({"key":key,**attempts[-1]},sort_keys=True)+"\n")
+            if remote is not None:
+                self.tunnels[key]=p
+                return remote
+            if p.poll() is None: p.terminate()
+            try: p.wait(timeout=3)
+            except subprocess.TimeoutExpired: p.kill()
+            time.sleep(2)
+        raise RuntimeError(f"bore tunnel failed for {key}: {attempts}")
 
     def start(self, campaign: str, scenario: str):
         self.stop_current()
