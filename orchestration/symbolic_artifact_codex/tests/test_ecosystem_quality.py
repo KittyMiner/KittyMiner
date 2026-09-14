@@ -194,7 +194,7 @@ class ReceiptAndProgressTests(unittest.TestCase):
         self.assertEqual(receipt["human_review"]["status"], "PENDING")
         self.assertEqual(receipt["existing_github_fat"]["status"], "HOLD")
         self.assertEqual(receipt["M04"]["state"], "LOCKED")
-        self.assertEqual(receipt["technical_report"]["decision_digest"], "b976fd874019cea7d4abaec9a7750859801f3cc44a0a4414cebecd49197e3eab")
+        self.assertEqual(receipt["technical_report"]["decision_digest"], "f3527caed2ad22b2c4ee9cd13886228ad1bb532c0cb244d11f642fbb54bbe2c5")
 
     def test_progress_register_keeps_human_review_and_m04_on_hold(self):
         progress = module.load_json_yaml(ROOT / "plans" / "M03-QA1_progress_register.yaml")
