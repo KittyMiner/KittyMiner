@@ -1,0 +1,1 @@
+{"baseline_id":"M03-QA1-BASELINE-2026-09-14","external_gates":{"github_fat_status":"HOLD"},"human_review":null,"expected_system_decision":"HOLD","expected_m04_state":"LOCKED","known_blockers":["GitHub Issues disabled for KittyMiner/KittyMiner","live idempotency FAT not PASS","independent human review not yet bound"]}
