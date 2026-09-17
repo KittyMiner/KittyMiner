@@ -1,0 +1,13 @@
+{
+  "horizon": "H1 (30d)",
+  "items": [
+    {"title":"Stand up Notion DBs & GitHub boards","domain":"Ops","desc":"Create per-horizon databases/boards; enable templates and views","owner":"Unassigned","due":"2026-10-10"},
+    {"title":"Seed labels & workflows","domain":"DevOps","desc":"Add labels, issue templates, and Actions for seeding issues and retros","owner":"Unassigned","due":"2026-10-11"},
+    {"title":"Guardian Pulsewatch MVP","domain":"AI/Analytics","desc":"Real-time telemetry and alerts dashboard","owner":"Unassigned","due":"2026-10-12"},
+    {"title":"Resonance Voting (Companion OS)","domain":"AI/Frontend","desc":"Enable vote collection and DAO signal output","owner":"Unassigned","due":"2026-10-13"},
+    {"title":"Grant-Hunter Digest","domain":"BizDev/Grants","desc":"Crawler plus weekly top-10 digest wired to boards","owner":"Unassigned","due":"2026-10-14"},
+    {"title":"Security & Ethics baseline","domain":"Security/Ethics","desc":"Threat model, data handling, consent, audit logging, and review gates","owner":"Unassigned","due":"2026-10-15"},
+    {"title":"Tarot+Glyph Sync Simulator","domain":"Product/UX","desc":"Deploy interactive alignment simulator in dashboard as a symbolic ideation layer, not a factual decision engine","owner":"Unassigned","due":"2026-10-16"},
+    {"title":"Agent Runner v0","domain":"Agents","desc":"Scoped agent per domain to draft research and tickets under human review","owner":"Unassigned","due":"2026-10-17"}
+  ]
+}
