@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'data/horizons/*.json'
+  workflow_dispatch:
 permissions:
   issues: write
   contents: read
@@ -16,6 +17,11 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
+            const repo = await github.rest.repos.get({owner: context.repo.owner, repo: context.repo.repo});
+            if (!repo.data.has_issues) {
+              core.notice('Issue seeding skipped: GitHub Issues are disabled for this repository. Enable Issues, then run this workflow manually.');
+              return;
+            }
             const dir = 'data/horizons';
             const files = fs.readdirSync(dir).filter(f => f.endsWith('.json') && f !== 'retros.json');
             const ensureLabel = async (name, color='6f42c1') => {
