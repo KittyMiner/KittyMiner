@@ -1,0 +1,24 @@
+name: Agent Runner (scoped)
+on:
+  issues:
+    types: [labeled]
+permissions:
+  issues: write
+  contents: read
+jobs:
+  run:
+    if: github.event.label.name == 'agent:run'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const labels = issue.labels.map(l => l.name);
+            const domain = labels.find(l => !['agent:run','backlog','H1 (30d)','H2 (50d)','H3 (90d)'].includes(l)) || 'Unclassified';
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body: `🤖 Scoped agent dispatch acknowledged.\n\n**Domain:** ${domain}\n**Authority:** analysis/drafting only; no autonomous merge, deployment, spending, or external commitment.\n**Governance route:** evidence → review → approve → merge/deploy.\n\nAgent outputs should be posted back to this issue with assumptions, evidence level, risks, and recommended next action.`
+            });
