@@ -1,0 +1,46 @@
+name: Seed Horizons -> Issues
+on:
+  push:
+    paths:
+      - 'data/horizons/*.json'
+permissions:
+  issues: write
+  contents: read
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const dir = 'data/horizons';
+            const files = fs.readdirSync(dir).filter(f => f.endsWith('.json') && f !== 'retros.json');
+            const ensureLabel = async (name, color='6f42c1') => {
+              try {
+                await github.rest.issues.getLabel({owner: context.repo.owner, repo: context.repo.repo, name});
+              } catch(e) {
+                await github.rest.issues.createLabel({owner: context.repo.owner, repo: context.repo.repo, name, color});
+              }
+            };
+            const ensureLabels = async (labels) => Promise.all(labels.map(l => ensureLabel(l)));
+            for (const f of files) {
+              const payload = JSON.parse(fs.readFileSync(path.join(dir,f), 'utf8'));
+              for (const item of payload.items) {
+                const title = `[${payload.horizon}] ${item.title}`;
+                const labels = [payload.horizon, item.domain, 'backlog'];
+                await ensureLabels(labels);
+                const search = await github.rest.search.issuesAndPullRequests({q: `repo:${context.repo.owner}/${context.repo.repo} is:issue in:title "${title.replace(/"/g,'')}"`});
+                if (search.data.total_count === 0) {
+                  await github.rest.issues.create({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    title,
+                    body: `${item.desc}\n\n**Owner**: ${item.owner||'Unassigned'}\n**Due**: ${item.due||'TBD'}\n**Horizon**: ${payload.horizon}`,
+                    labels
+                  });
+                }
+              }
+            }
