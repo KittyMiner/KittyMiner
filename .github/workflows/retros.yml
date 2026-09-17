@@ -1,0 +1,34 @@
+name: Retrospective Scheduler (30/50/90d)
+on:
+  schedule:
+    - cron: '15 13 * * *'
+permissions:
+  issues: write
+  contents: read
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const cfg = JSON.parse(fs.readFileSync('data/horizons/retros.json','utf8'));
+            const start = new Date(`${cfg.start_date}T00:00:00Z`);
+            const today = new Date(new Date().toISOString().slice(0,10) + 'T00:00:00Z');
+            for (const d of cfg.windows) {
+              const due = new Date(start.getTime() + d*86400000);
+              if (today.getTime() !== due.getTime()) continue;
+              const title = `Retrospective (${d}d) — prune/merge/fork`;
+              const q = `repo:${context.repo.owner}/${context.repo.repo} is:issue in:title \"${title}\"`;
+              const existing = await github.rest.search.issuesAndPullRequests({q});
+              if (existing.data.total_count > 0) continue;
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body: `Auto-generated ${d}-day retrospective.\n\n- [ ] Review progress and KPI evidence\n- [ ] Prune stale prompts/workstreams\n- [ ] Merge convergent work\n- [ ] Fork promising unresolved paths\n- [ ] Reassess risks and governance gates\n- [ ] Update next-horizon priorities`,
+                labels: ['retro']
+              });
+            }
