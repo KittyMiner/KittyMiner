@@ -1,0 +1,12 @@
+{
+  "horizon": "H3 (90d)",
+  "items": [
+    {"title":"Interstellar ICS Starmap","domain":"Research/Visualization","desc":"Evidence-labeled visualization of speculative interstellar symbol concepts and lineage","owner":"Unassigned","due":"2026-12-10"},
+    {"title":"Codex Probe II ops plan","domain":"R&D/Space","desc":"Conceptual payload, telemetry, constraints, and verification plan; no launch or operational authority implied","owner":"Unassigned","due":"2026-12-11"},
+    {"title":"3D Mythic Codex interface","domain":"3D/Frontend","desc":"Immersive symbolic environment per archetype with explicit symbolic-vs-empirical labeling","owner":"Unassigned","due":"2026-12-12"},
+    {"title":"Guardian AI speech layer","domain":"AI/Voice","desc":"Narration, memory threads, multilingual accessibility, and audit trail","owner":"Unassigned","due":"2026-12-13"},
+    {"title":"Scale to multi-team grid","domain":"Ops","desc":"Org roles, SSO, audit, cost controls, incident response, and access governance","owner":"Unassigned","due":"2026-12-14"},
+    {"title":"Ritual scheduler & lunar sync","domain":"Product","desc":"Optional symbolic scheduling experience clearly separated from operational decision logic","owner":"Unassigned","due":"2026-12-15"},
+    {"title":"Security hardening & audits","domain":"Security","desc":"Penetration testing, red team, SBOMs, secrets/key management, recovery, and evidence closure","owner":"Unassigned","due":"2026-12-16"}
+  ]
+}
