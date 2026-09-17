@@ -1,0 +1,41 @@
+{
+  "projects": [
+    {
+      "name": "H1 — 30-Day Execution",
+      "horizon": "H1 (30d)",
+      "purpose": "Immediate execution, instrumentation, governance baseline, and pilot readiness.",
+      "views": [
+        {"name":"Execution Board","layout":"board","group_by":"Status"},
+        {"name":"Domain Matrix","layout":"table","group_by":"Domain"},
+        {"name":"30-Day Roadmap","layout":"roadmap","date_field":"Due"},
+        {"name":"Risk & Gates","layout":"table","filters":["Risk != Low OR Gate != Approved"]}
+      ]
+    },
+    {
+      "name": "H2 — 50-Day Integration",
+      "horizon": "H2 (50d)",
+      "purpose": "Integrate contracts, XR interfaces, controlled ML optimization, metrics, and compliance gates.",
+      "views": [
+        {"name":"Integration Board","layout":"board","group_by":"Status"},
+        {"name":"Domain Matrix","layout":"table","group_by":"Domain"},
+        {"name":"50-Day Roadmap","layout":"roadmap","date_field":"Due"},
+        {"name":"Governance Queue","layout":"table","filters":["Gate = Review OR Gate = Hold"]}
+      ]
+    },
+    {
+      "name": "H3 — 90-Day Scale & Research",
+      "horizon": "H3 (90d)",
+      "purpose": "Scale validated systems, harden security, and preserve speculative research as evidence-labeled R&D.",
+      "views": [
+        {"name":"Scale Board","layout":"board","group_by":"Status"},
+        {"name":"Research Matrix","layout":"table","group_by":"Domain"},
+        {"name":"90-Day Roadmap","layout":"roadmap","date_field":"Due"},
+        {"name":"Evidence Boundary","layout":"table","filters":["Evidence != Validated"]}
+      ]
+    }
+  ],
+  "fields": ["Status","Horizon","Domain","Priority","Risk","Evidence","Gate","Owner","Due","KPI","Dependencies","Repository Path"],
+  "status_values": ["Backlog","Ready","In Progress","Review","Blocked","Done"],
+  "gate_values": ["Draft","Review","Approved","Hold","Rejected"],
+  "evidence_values": ["Speculative","Hypothesis","Simulated","Tested","Validated"]
+}
