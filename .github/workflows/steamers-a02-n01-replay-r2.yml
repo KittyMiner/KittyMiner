@@ -1,0 +1,24 @@
+name: STEAMERS A0.2 N01 Qualification Replay R2
+on:
+  push:
+    branches: [gaia-steamers-a01-requal-20260922]
+    paths: [.github/workflows/steamers-a02-n01-replay-r2.yml]
+permissions:
+  contents: read
+jobs:
+  n01:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replay N01 only and probe post-state
+        run: |
+          chmod +x gaia-requal/steamers-a02/run_n01.sh
+          gaia-requal/steamers-a02/run_n01.sh
+      - name: Upload N01 R2 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: STEAMERS_A0.2_N01_REPLAY_R2_EVIDENCE
+          path: ${{ runner.temp }}/steamers-a02-n01/evidence
+          if-no-files-found: warn
