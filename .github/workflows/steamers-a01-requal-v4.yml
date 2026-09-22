@@ -1,0 +1,32 @@
+name: STEAMERS A0.1 Runtime Requalification v4
+on:
+  push:
+    branches:
+      - gaia-steamers-a01-requal-20260922
+    paths:
+      - .github/workflows/steamers-a01-requal-v4.yml
+
+permissions:
+  contents: read
+
+jobs:
+  requalify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DO_NOT_TRACK: "1"
+    steps:
+      - name: Checkout isolated requalification branch
+        uses: actions/checkout@v4
+      - name: Execute exact frozen v0.1.0 requalification
+        run: |
+          chmod +x gaia-requal/steamers-a01/run_requalification.sh
+          gaia-requal/steamers-a01/run_requalification.sh
+      - name: Upload runtime evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: STEAMERS_PROJECT_PASSPORT_ICP_A0.1_RUNTIME_REQUAL_V4
+          path: ${{ runner.temp }}/steamers-a01-requal/evidence
+          if-no-files-found: warn
+          retention-days: 7
