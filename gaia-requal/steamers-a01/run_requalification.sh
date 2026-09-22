@@ -2,7 +2,7 @@
 set -euo pipefail
 
 BRANCH_ROOT="$PWD"
-B64="$BRANCH_ROOT/gaia-requal/steamers-a01/frozen_bundle.tar.gz.b64"
+PART_DIR="$BRANCH_ROOT/gaia-requal/steamers-a01/frozen_parts"
 WORK="$RUNNER_TEMP/steamers-a01-requal"
 EVID="$WORK/evidence"
 mkdir -p "$WORK" "$EVID"
@@ -11,7 +11,7 @@ EXPECTED_ARCHIVE_SHA="ea063e896af95f6297c63e2288ba6e4b31b40d998e023c2cc7cfb485e4
 EXPECTED_CONTRACT_ROOT="fd0658ef38123576374aa9ef796413b8f546821cb65d2937dadb1bb053e30c01"
 ARTIFACT_DIR="STEAMERS_PROJECT_PASSPORT_ICP_A0.1_v0.1.0"
 
-base64 -d "$B64" > "$WORK/frozen_bundle.tar.gz"
+cat "$PART_DIR"/part-* > "$WORK/frozen_bundle.tar.gz.b64"\nbase64 -d "$WORK/frozen_bundle.tar.gz.b64" > "$WORK/frozen_bundle.tar.gz"
 echo "$EXPECTED_ARCHIVE_SHA  $WORK/frozen_bundle.tar.gz" | sha256sum -c -
 tar -xzf "$WORK/frozen_bundle.tar.gz" -C "$WORK"
 ROOT="$WORK/$ARTIFACT_DIR"
