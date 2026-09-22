@@ -189,7 +189,7 @@ run_sequence() {
 
 run_sequence run1
 
-icp deploy steamers_project_passport --mode reinstall --argument "$INIT_ARGS" 2>&1 | tee "$EVID/reinstall_run2.txt"
+icp deploy steamers_project_passport --mode reinstall --args "$INIT_ARGS" 2>&1 | tee "$EVID/reinstall_run2.txt"
 icp canister status steamers_project_passport 2>&1 | tee "$EVID/status_run2.txt"
 run_sequence run2
 
