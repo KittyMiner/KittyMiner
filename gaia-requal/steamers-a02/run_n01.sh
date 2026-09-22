@@ -54,8 +54,7 @@ icp canister create steamers_project_passport 2>&1 | tee "$EVID/create.txt"
 # Explicitly use anonymous identity for the frozen N01 call.
 icp identity default anonymous
 set +e
-icp canister install steamers_project_passport --args '(record { authority_principal = principal "2vxsx-fae"; authority_digest = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" })' >"$EVID/n01_call.txt" 2>&1
-RC=$?
+{ icp canister install steamers_project_passport --args '(record { authority_principal = principal "2vxsx-fae"; authority_digest = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" })' >"$EVID/n01_call.txt" 2>&1; RC=$?; } || RC=$?
 set -e
 cat "$EVID/n01_call.txt"
 test "$RC" -ne 0
@@ -63,8 +62,7 @@ grep -q "anonymous authority principal is forbidden" "$EVID/n01_call.txt"
 
 # The failed init must leave the canister uninitialized. A query method cannot execute.
 set +e
-icp canister call steamers_project_passport get_passport '("STEAMERS-WATER-001")' >"$EVID/post_query.txt" 2>&1
-QRC=$?
+{ icp canister call steamers_project_passport get_passport '("STEAMERS-WATER-001")' >"$EVID/post_query.txt" 2>&1; QRC=$?; } || QRC=$?
 set -e
 cat "$EVID/post_query.txt"
 test "$QRC" -ne 0
