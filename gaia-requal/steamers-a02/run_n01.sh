@@ -53,14 +53,30 @@ icp canister create steamers_project_passport 2>&1 | tee "$EVID/create.txt"
 
 # Explicitly use anonymous identity for the frozen N01 call.
 icp identity default anonymous
-if icp canister install steamers_project_passport --args '(record { authority_principal = principal "2vxsx-fae"; authority_digest = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" })' >"$EVID/n01_call.txt" 2>&1; then
-  RC=0
-else
-  RC=$?
-fi
+
+# Capture the expected failed install as data. This wrapper always exits 0;
+# adjudication below evaluates the captured child return code and output.
+python3 - <<'PY'
+import json, subprocess, pathlib
+evid = pathlib.Path("$EVID")
+cmd = [
+    "icp","canister","install","steamers_project_passport","--args",
+    '(record { authority_principal = principal "2vxsx-fae"; authority_digest = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" })'
+]
+p = subprocess.run(cmd, text=True, capture_output=True)
+(evid/"n01_call.stdout.txt").write_text(p.stdout)
+(evid/"n01_call.stderr.txt").write_text(p.stderr)
+(evid/"n01_call.txt").write_text(p.stdout + p.stderr)
+(evid/"n01_call_result.json").write_text(json.dumps({
+    "returncode": p.returncode,
+    "stdout_sha256": __import__("hashlib").sha256(p.stdout.encode()).hexdigest(),
+    "stderr_sha256": __import__("hashlib").sha256(p.stderr.encode()).hexdigest()
+}, indent=2, sort_keys=True) + "\n")
+PY
+RC="$(python3 -c 'import json; print(json.load(open("'"$EVID"'/n01_call_result.json"))["returncode"])')"
 cat "$EVID/n01_call.txt"
 test "$RC" -ne 0
-grep -q "anonymous authority principal is forbidden" "$EVID/n01_call.txt"
+grep -q "authority principal must not be anonymous" "$EVID/n01_call.txt"
 
 # The failed init must leave the canister uninitialized. A query method cannot execute.
 if icp canister call steamers_project_passport get_passport '("STEAMERS-WATER-001")' >"$EVID/post_query.txt" 2>&1; then
