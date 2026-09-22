@@ -50,6 +50,8 @@ printf 'ic-wasm=' | tee -a "$EVID/toolchain_versions.txt"; ic-wasm --version | t
 printf 'candid-extractor=' | tee -a "$EVID/toolchain_versions.txt"; candid-extractor --version | tee -a "$EVID/toolchain_versions.txt" || true
 
 icp settings telemetry false || true
+icp identity new steamers-requal --storage plaintext --output-seed "$WORK/steamers-requal.seed" >/dev/null
+icp identity default steamers-requal
 icp network start -d | tee "$EVID/network_start.txt"
 trap 'icp network stop >/dev/null 2>&1 || true' EXIT
 
@@ -195,7 +197,7 @@ cmp -s "$EVID/run1/roots.txt" "$EVID/run2/roots.txt"
 cmp -s "$EVID/run1/final_semantic_root.txt" "$EVID/run2/final_semantic_root.txt"
 
 FINAL_ROOT="$(cat "$EVID/run1/final_semantic_root.txt")"
-WASM_HASH="$(find . -type f -name '*.wasm' -print0 | sort -z | xargs -0 -r sha256sum | head -1 | awk '{print $1}')"
+WASM_HASH="$(sha256sum ./target/wasm32-unknown-unknown/release/steamers_project_passport.wasm | awk '{print $1}')"
 cat > "$EVID/semantic_root_comparison.txt" <<REPORT
 contract_root=$EXPECTED_CONTRACT_ROOT
 run1_final_semantic_root=$FINAL_ROOT
