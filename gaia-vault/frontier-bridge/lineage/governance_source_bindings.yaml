@@ -1,0 +1,17 @@
+binding_id: GAIA-PGS001-GOV-SOURCES-v0.1
+as_of: 2026-08-10
+github:
+  repository: KittyMiner/KittyMiner
+  branch: gaia/frontier-bridge-pgs001-vl13
+  base_commit: dd8008e1037ad97e60fc56f66741feb0e8218aa0
+  governance_anchor: gaia-vault/claim-review/claim_review_template.yaml
+notion:
+  database: Gaia Governance Gates
+  data_source: collection://e145d107-9c11-4e2d-b013-2011ce5c04bc
+  verified: true
+lineage_rules:
+  - source_hashes_and_commit_ids_are_evidence
+  - task_notifications_are_not_authority
+  - agent_handoff_is_not_approval
+  - missing_records_remain_pending
+  - promotion_requires_exact_version_scope_and_human_authority

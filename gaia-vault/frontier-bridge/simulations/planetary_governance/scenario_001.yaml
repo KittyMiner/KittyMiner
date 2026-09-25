@@ -1,0 +1,22 @@
+scenario_id: PGS-001
+version: 0.2
+mode: SYNTHETIC_ONLY
+title: Planetary water-stress signal to enterprise governance decision
+zones:
+  source: Z2_PLANETARY_SIM
+  destination: Z3_ENTERPRISE_SUPPORT
+no_live_actuation: true
+inputs:
+  - synthetic_water_stress_index
+  - synthetic_supply_chain_exposure
+  - synthetic_population_vulnerability
+human_approval_required_for:
+  - procurement_change
+  - public_claim
+  - partner_commitment
+  - resource_allocation
+stop_conditions:
+  - live_data_contamination
+  - attempted_real_world_actuation
+  - missing_authority_for_high_impact_action
+  - simulation_presented_as_forecast
