@@ -1,0 +1,30 @@
+name: GAIA QF04-XH Authentic Source Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/gaia-qf04-xh-source-v3.yml"
+      - "qf04_xh/source_v3/**"
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  reconstruct:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [a, b]
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct authenticated QF04 source set
+        run: bash qf04_xh/source_v3/reconstruct_and_verify.sh qf04_xh/source_v3 /tmp/qf04-source-v3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qf04-xh-source-v3-${{ matrix.runner }}
+          path: /tmp/qf04-source-v3/reconstruction_receipt.json
+          retention-days: 2

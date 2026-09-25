@@ -1,0 +1,84 @@
+name: GAIA QF04-XH Reconstruction Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/gaia-qf04-xh-probe.yml"
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  reconstruct_a:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct frozen QF04 capsule
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/qf04
+          cat             qf04_xh/capsule_v2/part.00             qf04_xh/capsule_v2/part.01             qf04_xh/capsule_v2/part.02             qf04_xh/capsule_v2/part.03             qf04_xh/capsule_v2/part.04             qf04_xh/capsule_v2/part.05             qf04_xh/capsule_v2/part.06_08             qf04_xh/capsule_v2/part.09             qf04_xh/capsule_v2/part.10             qf04_xh/capsule_v2/part.11             qf04_xh/capsule_v2/part.12           | tr -d '\n\r ' | base64 -d > /tmp/qf04/capsule.zip
+          test "$(stat -c %s /tmp/qf04/capsule.zip)" = "132126"
+          echo "4ecc886126435b5c3c9198e1b6fa68cd1faa1c012a7e23c5039a377a4ad358f8  /tmp/qf04/capsule.zip" | sha256sum -c -
+          unzip -t /tmp/qf04/capsule.zip >/tmp/qf04/unzip_test.txt
+          python - <<'PY'
+          import hashlib, json, os, pathlib, socket
+          p=pathlib.Path('/tmp/qf04/capsule.zip')
+          out={
+            "gate":"QF04-XH_CAPSULE_RECONSTRUCTION",
+            "status":"PASS",
+            "sha256":hashlib.sha256(p.read_bytes()).hexdigest(),
+            "bytes":p.stat().st_size,
+            "runner_name":os.getenv("RUNNER_NAME"),
+            "runner_os":os.getenv("RUNNER_OS"),
+            "boot_id":pathlib.Path("/proc/sys/kernel/random/boot_id").read_text().strip(),
+            "hostname":socket.gethostname(),
+          }
+          pathlib.Path('/tmp/qf04/result.json').write_text(json.dumps(out,sort_keys=True))
+          print(json.dumps(out,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qf04-xh-reconstruct-a
+          path: /tmp/qf04/result.json
+          retention-days: 2
+
+  reconstruct_b:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct frozen QF04 capsule
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/qf04
+          cat             qf04_xh/capsule_v2/part.00             qf04_xh/capsule_v2/part.01             qf04_xh/capsule_v2/part.02             qf04_xh/capsule_v2/part.03             qf04_xh/capsule_v2/part.04             qf04_xh/capsule_v2/part.05             qf04_xh/capsule_v2/part.06_08             qf04_xh/capsule_v2/part.09             qf04_xh/capsule_v2/part.10             qf04_xh/capsule_v2/part.11             qf04_xh/capsule_v2/part.12           | tr -d '\n\r ' | base64 -d > /tmp/qf04/capsule.zip
+          test "$(stat -c %s /tmp/qf04/capsule.zip)" = "132126"
+          echo "4ecc886126435b5c3c9198e1b6fa68cd1faa1c012a7e23c5039a377a4ad358f8  /tmp/qf04/capsule.zip" | sha256sum -c -
+          unzip -t /tmp/qf04/capsule.zip >/tmp/qf04/unzip_test.txt
+          python - <<'PY'
+          import hashlib, json, os, pathlib, socket
+          p=pathlib.Path('/tmp/qf04/capsule.zip')
+          out={
+            "gate":"QF04-XH_CAPSULE_RECONSTRUCTION",
+            "status":"PASS",
+            "sha256":hashlib.sha256(p.read_bytes()).hexdigest(),
+            "bytes":p.stat().st_size,
+            "runner_name":os.getenv("RUNNER_NAME"),
+            "runner_os":os.getenv("RUNNER_OS"),
+            "boot_id":pathlib.Path("/proc/sys/kernel/random/boot_id").read_text().strip(),
+            "hostname":socket.gethostname(),
+          }
+          pathlib.Path('/tmp/qf04/result.json').write_text(json.dumps(out,sort_keys=True))
+          print(json.dumps(out,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qf04-xh-reconstruct-b
+          path: /tmp/qf04/result.json
+          retention-days: 2
