@@ -1,0 +1,37 @@
+{
+  "fat_id": "GAIA-SAC-IDEMPOTENCY-FAT-2026-08-19",
+  "repository": "KittyMiner/KittyMiner",
+  "branch": "gaia/symbolic-codex-idempotency-fat-v0.2",
+  "attempt": "run1_retry_2026-08-19T01:30:00-04:00",
+  "reviewed_artifact": "orchestration/symbolic_artifact_codex/issues/reviewed/issues_idempotency_fat.jsonl",
+  "reviewed_artifact_git_blob_sha": "1aa1223ac0990cdd3829ca2a8453e80a1ac3191f",
+  "reviewed_artifact_sha256": "180897cf23cdee4b804642e46b65f784eeb99615116340d3ab8daa8b430ad024",
+  "canonical_issue_ids": [
+    "GAIA-SAC-FAT-001",
+    "GAIA-SAC-FAT-002",
+    "GAIA-SAC-FAT-003"
+  ],
+  "precheck": {
+    "GAIA-SAC-FAT-001": "ABSENT",
+    "GAIA-SAC-FAT-002": "ABSENT",
+    "GAIA-SAC-FAT-003": "ABSENT"
+  },
+  "mutation_attempted": "GAIA-SAC-FAT-001",
+  "observed": {
+    "created": 0,
+    "skipped": 0,
+    "partial_creation": false,
+    "status": "BLOCKED_REPOSITORY_ISSUES_DISABLED",
+    "github_http_status": 410,
+    "github_message": "Issues has been disabled in this repository."
+  },
+  "disposition": "HOLD",
+  "invariants_preserved": [
+    "sealed reviewed artifact was not modified",
+    "canonical issue IDs were not renamed or regenerated",
+    "no replacement baseline was created",
+    "no partial GitHub issue creation occurred",
+    "execution failed closed before mutation"
+  ],
+  "next_gate": "Enable GitHub Issues for KittyMiner/KittyMiner, then replay the exact reviewed artifact SHA-256 twice."
+}
