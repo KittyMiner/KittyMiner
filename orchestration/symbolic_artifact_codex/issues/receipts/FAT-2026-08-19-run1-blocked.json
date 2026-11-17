@@ -1,0 +1,38 @@
+{
+  "fat_id": "GAIA-SAC-IDEMPOTENCY-FAT-2026-08-19",
+  "repository": "KittyMiner/KittyMiner",
+  "branch": "gaia/symbolic-codex-idempotency-fat-v0.2",
+  "reviewed_artifact": "orchestration/symbolic_artifact_codex/issues/reviewed/issues_idempotency_fat.jsonl",
+  "reviewed_artifact_sha256": "180897cf23cdee4b804642e46b65f784eeb99615116340d3ab8daa8b430ad024",
+  "canonical_issue_ids": [
+    "GAIA-SAC-FAT-001",
+    "GAIA-SAC-FAT-002",
+    "GAIA-SAC-FAT-003"
+  ],
+  "precheck": {
+    "GAIA-SAC-FAT-001": "ABSENT",
+    "GAIA-SAC-FAT-002": "ABSENT",
+    "GAIA-SAC-FAT-003": "ABSENT"
+  },
+  "run": 1,
+  "expected": {
+    "created": 3,
+    "skipped": 0
+  },
+  "observed": {
+    "created": 0,
+    "skipped": 0,
+    "partial_creation": false,
+    "status": "BLOCKED_REPOSITORY_ISSUES_DISABLED",
+    "github_http_status": 410,
+    "github_message": "Issues has been disabled in this repository."
+  },
+  "disposition": "HOLD",
+  "invariants_preserved": [
+    "exact reviewed artifact remained unchanged",
+    "no partial GitHub issue creation occurred",
+    "canonical issue IDs remained unused",
+    "execution failed closed before mutation"
+  ],
+  "next_gate": "Enable GitHub Issues for KittyMiner/KittyMiner, then replay this exact SHA-256 artifact twice without modification."
+}
