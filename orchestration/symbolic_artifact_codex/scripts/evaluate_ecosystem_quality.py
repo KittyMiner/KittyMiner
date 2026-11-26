@@ -52,7 +52,11 @@ def _validate_axes(owner_id: str, axes: dict[str, Any]) -> None:
         if status not in VALID_AXIS_STATUS:
             raise IntegrityError(f"{owner_id}:{name}: invalid status {status!r}")
         evidence_refs = axis.get("evidence_refs")
-        if status == "PASS" and (not isinstance(evidence_refs, list) or not any(str(x).strip() for x in evidence_refs)):
+        if status == "PASS" and (
+            not isinstance(evidence_refs, list)
+            or not evidence_refs
+            or not all(isinstance(x, str) and x.strip() for x in evidence_refs)
+        ):
             raise IntegrityError(f"{owner_id}:{name}: PASS requires evidence_refs")
 
 
@@ -124,7 +128,7 @@ def validate_bundle(bundle: dict[str, Any]) -> None:
         raise IntegrityError(f"exactly one specialization required per ecosystem: {per_ecosystem}")
 
 
-def _entity_result(obj: dict[str, Any]) -> dict[str, Any]:
+def _entity_result(obj: dict[str, Any], *, specialization: bool = False) -> dict[str, Any]:
     critical_statuses = [obj["axes"][name]["status"] for name in CRITICAL_AXES]
     if "RED" in critical_statuses:
         decision = "REDESIGN"
@@ -133,6 +137,13 @@ def _entity_result(obj: dict[str, Any]) -> dict[str, Any]:
     else:
         score = sum(SCORE[obj["axes"][name]["status"]] for name in AXIS_NAMES) / len(AXIS_NAMES)
         decision = "PASS" if score >= PASS_SCORE_THRESHOLD else "HOLD"
+    if specialization and decision == "PASS":
+        # Fail closed: a specialization may only validate PASS when its
+        # upstream gate has passed and a PASS was actually requested.
+        # A HOLD, RED, or omitted value on either field caps the
+        # decision at HOLD instead of letting axis scores override it.
+        if obj.get("upstream_gate_status") != "PASS" or obj.get("requested_decision") != "PASS":
+            decision = "HOLD"
     score = sum(SCORE[obj["axes"][name]["status"]] for name in AXIS_NAMES) / len(AXIS_NAMES)
     return {
         "id": obj["id"],
@@ -154,7 +165,7 @@ def evaluate_bundle(bundle: dict[str, Any], external_gates: dict[str, Any] | Non
     validate_bundle(bundle)
     external_gates = dict(external_gates or {})
     ecosystem_results = [_entity_result(x) for x in sorted(bundle["ecosystems"], key=lambda x: x["id"])]
-    specialization_results = [_entity_result(x) for x in sorted(bundle["specializations"], key=lambda x: x["id"])]
+    specialization_results = [_entity_result(x, specialization=True) for x in sorted(bundle["specializations"], key=lambda x: x["id"])]
     all_results = ecosystem_results + specialization_results
     if any(x["decision"] == "REDESIGN" for x in all_results):
         decision = "REDESIGN"
@@ -185,7 +196,14 @@ def _validate_human_review(report: dict[str, Any], human_review: dict[str, Any] 
         raise IntegrityError("human reviewer must be independent")
     if human_review.get("approved") is not True:
         return False
-    if human_review.get("decision_digest") != report.get("decision_digest"):
+    # Fail closed: recompute the digest from the report's current
+    # contents. Comparing stored digest strings alone lets a report
+    # edited after approval (e.g. its top-level decision flipped to
+    # PASS while a critical HOLD remains inside) still unlock M04.
+    recomputed = canonical_digest(report)
+    if report.get("decision_digest") != recomputed:
+        raise IntegrityError("report contents do not match its decision digest")
+    if human_review.get("decision_digest") != recomputed:
         raise IntegrityError("human review digest does not match decision digest")
     return True
 
