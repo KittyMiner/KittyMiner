@@ -5,20 +5,26 @@ demonstrable) and PASSES against the patched evaluator (the bypass is
 closed). The positive control passes against both, proving the fixes
 do not break the legitimate PASS / M04-unlock path.
 
-Run from the directory containing evaluate_ecosystem_quality.py:
-    python -m unittest test_quality_gate_fail_closed -v
+Run from the repository root with the documented discovery command:
+    python -m unittest discover -s orchestration/symbolic_artifact_codex/tests -p 'test_*.py' -v
 """
 
 import copy
+import importlib.util
+from pathlib import Path
 import unittest
 
-from evaluate_ecosystem_quality import (
-    AXIS_NAMES,
-    CRITICAL_AXES,
-    IntegrityError,
-    evaluate_bundle,
-    m04_unlock_allowed,
-)
+ROOT = Path(__file__).parents[1]
+MODULE_PATH = ROOT / "scripts" / "evaluate_ecosystem_quality.py"
+spec = importlib.util.spec_from_file_location("evaluate_ecosystem_quality", MODULE_PATH)
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+
+AXIS_NAMES = module.AXIS_NAMES
+CRITICAL_AXES = module.CRITICAL_AXES
+IntegrityError = module.IntegrityError
+evaluate_bundle = module.evaluate_bundle
+m04_unlock_allowed = module.m04_unlock_allowed
 
 
 def _axes(status="PASS", evidence_refs=None):
